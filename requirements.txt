@@ -1,0 +1,19 @@
+# Inference (02_run_experiment.ipynb)
+vllm>=0.6
+transformers>=4.46
+torch>=2.4
+huggingface-hub>=0.25
+
+# Question generation (01_question_generation.ipynb)
+openai>=1.40
+datasets>=2.20
+
+# Audit + analysis (03 / 04)
+pandas>=2.0
+numpy>=1.24
+pyarrow>=14.0
+scipy>=1.11
+statsmodels>=0.14
+matplotlib>=3.8
+seaborn>=0.13
+tqdm>=4.66
