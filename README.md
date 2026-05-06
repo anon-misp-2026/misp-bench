@@ -72,7 +72,8 @@ huggingface-cli login            # interactive, sets up cache
 # 3. Audit (produces tables/t0_question_flags.csv)
 jupyter nbconvert --execute --to notebook --inplace 03_quality_audit.ipynb
 
-# 4. Inference (runs 11 models)
+# 4. Inference (runs 11 models on 2x H100 80GB, calendar span ~17 days
+#    in our run; per-cell active GPU time was not centrally captured)
 jupyter nbconvert --execute --to notebook --inplace 02_run_experiment.ipynb
 
 # 5. Analysis
@@ -80,16 +81,22 @@ jupyter nbconvert --execute --to notebook --inplace 04_analysis.ipynb
 ```
 
 `02_run_experiment.ipynb` loads each model sequentially with `gc.collect()` +
-`torch.cuda.empty_cache()` between models. The notebook can run on either a
-single GPU with enough VRAM or a multi-GPU node; tune `gpu_memory_utilization`
-and `max_model_len` per model in the `MODELS` dict to fit your setup.
+`torch.cuda.empty_cache()` between. Our run used 2x NVIDIA H100 80GB with
+`tensor_parallel_size=2` for the 27B model and single-GPU for the rest.
+The per-model `gpu_memory_utilization` and `max_model_len` are tuned in
+the `MODELS` dictionary and can be adjusted for other hardware.
 
 ### Compute budget
 
-Inference for the released response set was performed on 2× NVIDIA H100 GPUs.
-Per-model wall time scales with model size; see the run logs in
-`tripod_<timestamp>.json` (written by `02_run_experiment.ipynb`) for the exact
-timings on your own hardware.
+The release contains 1,933,620 raw response records on the pre-audit pool
+of 2,494 items. The audited analysis subset reported in the paper is 
+1,333,254 records on 1,724 items (see `03_quality_audit.ipynb` and the 
+paper's six-category audit, Table 1).
+
+Inference was performed on a 2x NVIDIA H100 80GB. Per-row metadata is 
+included in each `results_<model>_*.csv` for practitioners estimating 
+compute on their own infrastructure. Per-cell active-time reconstruction
+would require dispatch-level metadata not centrally captured in this run.
 
 ---
 
